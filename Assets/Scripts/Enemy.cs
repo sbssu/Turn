@@ -5,16 +5,18 @@ using UnityEngine;
 public class Enemy : Character
 {
     public override bool IsPlayable => false;
-    public override bool SkillQ()
+
+    public override void StartTurn(System.Action onEndTurn)
     {
-        return false;
+        base.StartTurn(onEndTurn);
+        Character[] targets = FindObjectsOfType<Playable>();
+        target = targets[Random.Range(0, targets.Length)];
+        StartCoroutine(IEUpdate());
     }
-    public override bool SkillE()
+
+    IEnumerator IEUpdate()
     {
-        return false;
-    }
-    public override bool SkillR()
-    {
-        return false;
+        yield return new WaitForSeconds(1f);
+        SkillQ();
     }
 }

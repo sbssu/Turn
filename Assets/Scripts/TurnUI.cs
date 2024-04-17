@@ -27,10 +27,15 @@ public class TurnUI : MonoBehaviour
 
     STATE state;
 
-    public void Setup(Sprite sprite, bool isPlayable)
+    public void Setup(Character character)
     {
-        characterImage.sprite = sprite;
-        teamImage.color = isPlayable ? new Color(0.2f, 1.0f, 0.2f) : new Color(1.0f, 0.2f, 0.2f);
+        characterImage.sprite = character.CharacterSprite;
+        teamImage.color = character.IsPlayable ? new Color(0.2f, 1.0f, 0.2f) : new Color(1.0f, 0.2f, 0.2f);
+
+        rect = GetComponent<RectTransform>();
+        rect.pivot = new Vector2(0.5f, 1f);
+
+        this.character = character;
     }
 
     public void MyTurn(bool isMyTurn)
@@ -49,12 +54,19 @@ public class TurnUI : MonoBehaviour
         state = STATE.DEAD;
         canvasGroup.alpha = 1f;
     }
-    public void Switch(bool isOn)
+    public void Show()
     {
-        state = isOn ? STATE.SHOWING : STATE.CLOSING;
-        panel.anchoredPosition = isOn ? new Vector3(30f, 0f, 0f) : Vector3.zero;
-        canvasGroup.alpha = isOn ? 0f : 1f;
+        state = STATE.SHOWING;
+        panel.anchoredPosition = new Vector3(30f, 0f, 0f);
+        canvasGroup.alpha = 0f;
     }
+    public void Close()
+    {
+        state = STATE.CLOSING;
+        panel.anchoredPosition = Vector3.zero;
+        canvasGroup.alpha = 0f;
+    }
+    
 
     float blinkTime = 0;
     private void Update()
