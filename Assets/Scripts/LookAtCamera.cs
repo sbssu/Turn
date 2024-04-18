@@ -4,17 +4,24 @@ using UnityEngine;
 public class LookAtCamera : MonoBehaviour
 {
     public static LookAtCamera Instance { get; private set; }
-    Camera cam;
+
+    StressReceiver stressReceiver;
+    CinemachineFreeLook vCam;
 
     private void Awake()
     {
-        cam = Camera.main;
         Instance = this;
+        stressReceiver = GetComponent<StressReceiver>();
+        vCam = GetComponent<CinemachineFreeLook>();
     }
 
-    public void SetPosition(Transform pivot, Transform lookAt)
+    public void SetPivot(Transform pivot, Transform lookAt)
     {
-        cam.transform.position = pivot.position;
-        cam.transform.LookAt(lookAt);
+        vCam.Follow = pivot;
+        vCam.LookAt = lookAt;
+    }
+    public void ShakeCamera()
+    {
+        stressReceiver.InduceStress(0.65f);
     }
 }

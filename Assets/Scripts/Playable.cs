@@ -13,7 +13,8 @@ public class Playable : Character
         base.StartTurn(onEndTurn);
 
         target = FindObjectsOfType<Enemy>().OrderBy(x => x.ActionPoint).First();
-        ControlPanel.Instance.SetTarget(target.transform);
+        ControlPanel.Instance.SetTarget(target.targetPivot);
+        LookAtCamera.Instance.SetPivot(camPivot, target.transform);
 
         ControlPanel.Instance.onSkillQ = SkillQ;
         ControlPanel.Instance.onSkillE = SkillE;
@@ -46,7 +47,8 @@ public class Playable : Character
                 if (enemy != null)
                 {
                     target = enemy;
-                    ControlPanel.Instance.SetTarget(target.transform);
+                    LookAtCamera.Instance.SetPivot(camPivot, target.transform);
+                    ControlPanel.Instance.SetTarget(target.targetPivot);
                 }
             }
         }

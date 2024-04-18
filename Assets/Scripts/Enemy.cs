@@ -11,6 +11,7 @@ public class Enemy : Character
         base.StartTurn(onEndTurn);
         Character[] targets = FindObjectsOfType<Playable>();
         target = targets[Random.Range(0, targets.Length)];
+        LookAtCamera.Instance.SetPivot(target.camPivot, transform);
         StartCoroutine(IEUpdate());
     }
 

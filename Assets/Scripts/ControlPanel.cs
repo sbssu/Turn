@@ -18,10 +18,15 @@ public class ControlPanel : MonoBehaviour
         Instance = this;
     }
 
+    Transform target;
     public void SetTarget(Transform target)
     {
+        this.target = target;
+    }
+    private void Update()
+    {
         targetRect.gameObject.SetActive(target);
-        if(target != null)
+        if (target != null)
             targetRect.position = Camera.main.WorldToScreenPoint(target.position);
     }
 

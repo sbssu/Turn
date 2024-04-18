@@ -12,16 +12,16 @@ public abstract class Character : MonoBehaviour
 
     [Header("Properties")]
     public Transform camPivot;      // 카메라 피벗.
-    public Transform lookAt;        // 바라볼 대상.
-    public GameObject turnObject;
+    public Transform targetPivot;   // 타겟 피벗.
 
     protected float hp;             // 체력.
     protected bool isMyTurn;        // 내 턴인가?
     protected bool isLocked;        // 움직임 제한.
 
-    float actionPoint;              // 행동력.
-    Vector3 originPosition;         // 원래 위치.
-    Action onEndTurn;               // 턴 종료시 실행할 함수.
+    protected float actionPoint;              // 행동력.
+    protected Vector3 originPosition;         // 원래 위치.
+    protected Action onEndTurn;               // 턴 종료시 실행할 함수.
+    protected Animator anim;                  // 애니메이터.   
 
 
     // 기본 스테이터스.
@@ -38,7 +38,7 @@ public abstract class Character : MonoBehaviour
     {
         hp = status.hp;
         originPosition = transform.position;
-        turnObject.SetActive(false);
+        anim = GetComponent<Animator>();
 
         ResetActionPoint();
     }        
@@ -46,7 +46,6 @@ public abstract class Character : MonoBehaviour
     // 차례 조정.
     public virtual void StartTurn(Action onEndTurn)
     {
-        turnObject.SetActive(true);
         this.onEndTurn = onEndTurn;
 
         isMyTurn = true;
@@ -54,7 +53,6 @@ public abstract class Character : MonoBehaviour
     }
     protected virtual void EndTurn()
     {
-        turnObject.SetActive(false);
         onEndTurn?.Invoke();
 
         isMyTurn = false;
@@ -65,9 +63,25 @@ public abstract class Character : MonoBehaviour
     {
 
     }
+
+    Coroutine moveCoroutine;
     protected void GoToPosition(Character target)
+    {  
+        if(moveCoroutine != null)
+            StopCoroutine(moveCoroutine);
+
+        Vector3 destination = originPosition;
+        if (target != null)
+            destination = target.transform.position + target.transform.forward * 2.5f;
+        moveCoroutine = StartCoroutine(IEGoToPosition(destination));
+    }
+    private IEnumerator IEGoToPosition(Vector3 destination)
     {
-        transform.position = (target == null) ? originPosition : target.originPosition + target.transform.forward * 1.5f;
+        while(transform.position != destination)
+        {
+            transform.position = Vector3.Lerp(transform.position, destination, 20f * Time.deltaTime);
+            yield return null;
+        }
     }
 
     // 액션 포인트.
@@ -86,31 +100,40 @@ public abstract class Character : MonoBehaviour
             return;
 
         isLocked = true;
-
         GoToPosition(target);
-        await Task.Delay(200);
-        await Task.Delay(400);
-        GoToPosition(null);
-        await Task.Delay(400);
+        anim.SetTrigger("onAttack");
+    }
+    protected virtual void SkillE()
+    {
+        if (isLocked)
+            return;
 
+        isLocked = true;
+    }
+    protected virtual void SkillR()
+    {
+        if (isLocked)
+            return;
+
+        isLocked = true;
+    }
+
+    protected virtual void Hit()
+    {
+        target.Damage();
+
+        FxManager.Instance.PlayFx("Hit", target.transform.position + Vector3.up * 1.2f);
+        LookAtCamera.Instance.ShakeCamera();
+    }
+    protected virtual async void EndHit()
+    {
+        GoToPosition(null);
+        await Task.Delay(300);
+        isLocked = false;
         EndTurn();
     }
-    protected virtual async void SkillE()
+    protected virtual void Damage()
     {
-        if (isLocked)
-            return;
-
-        isLocked = true;
-
-        await Task.Yield();        
-    }
-    protected virtual async void SkillR()
-    {
-        if (isLocked)
-            return;
-
-        isLocked = true;
-
-        await Task.Yield();        
+        anim.SetTrigger("onDamage");
     }
 }
